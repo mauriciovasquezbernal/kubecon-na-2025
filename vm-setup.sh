@@ -27,6 +27,20 @@ Signed-by: /etc/apt/keyrings/microsoft.gpg" | sudo tee /etc/apt/sources.list.d/a
 sudo apt-get update
 sudo apt-get install azure-cli
 
+# Configure kubectl to connect to AKS cluster
+# Get the resource group name from instance metadata
+RESOURCE_GROUP=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance/compute/resourceGroupName?api-version=2021-02-01&format=text")
+
+# Get the AKS cluster name (assuming it follows the naming pattern)
+CLUSTER_NAME="aks-kubeconna2025"
+
+# Login using the VM's managed identity
+az login --identity
+
+# Get AKS credentials and configure kubectl
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME -f /home/azureuser/.kube/config
+sudo chown azureuser /home/azureuser/.kube/config
+
 # install docker
 sudo apt-get install -y docker.io
 sudo usermod -aG docker azureuser
@@ -43,19 +57,6 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 # install kubectl-gadget
 curl -sL https://github.com/inspektor-gadget/inspektor-gadget/releases/download/${IG_VERSION}/kubectl-gadget-linux-${IG_ARCH}-${IG_VERSION}.tar.gz  | sudo tar -C /usr/local/bin -xzf - kubectl-gadget
-
-# Configure kubectl to connect to AKS cluster
-# Get the resource group name from instance metadata
-RESOURCE_GROUP=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/instance/compute/resourceGroupName?api-version=2021-02-01&format=text")
-
-# Get the AKS cluster name (assuming it follows the naming pattern)
-CLUSTER_NAME="aks-kubeconna2025"
-
-# Login using the VM's managed identity
-az login --identity
-
-# Get AKS credentials and configure kubectl
-az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME
 
 # Verify the connection
 kubectl cluster-info

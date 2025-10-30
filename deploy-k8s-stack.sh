@@ -14,31 +14,17 @@ kubectl version --client
 echo "Getting AKS credentials..."
 az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --overwrite-existing
 
-# Verify cluster connection
-echo "Verifying cluster connection..."
-kubectl get nodes
+# Create YAML files from environment variables
+echo "Creating Kubernetes manifests..."
+echo "$PROMETHEUS_YAML" > prometheus.yaml
+echo "$GRAFANA_YAML" > grafana.yaml
 
-# List current namespaces before creation
-echo "Current namespaces before creation:"
-kubectl get namespaces
+# Deploy prometheus
+echo "Deploying Prometheus..."
+kubectl apply -f prometheus.yaml
 
-# Create demo namespace
-echo "Creating demo namespace..."
-kubectl create namespace demo-apps --dry-run=client -o yaml
-kubectl create namespace demo-apps
+# Deploy grafana
+echo "Deploying Grafana..."
+kubectl apply -f grafana.yaml
 
-# Verify namespace was created
-echo "Verifying namespace creation..."
-if kubectl get namespace demo-apps; then
-    echo "✅ Namespace 'demo-apps' created successfully!"
-else
-    echo "❌ Failed to create namespace 'demo-apps'"
-    exit 1
-fi
-
-# List all namespaces after creation
-echo "All namespaces after creation:"
-kubectl get namespaces
-
-echo "Deployment script completed successfully!"
-echo "Namespace creation verified at $(date)"
+echo "Deployment completed successfully at $(date)"

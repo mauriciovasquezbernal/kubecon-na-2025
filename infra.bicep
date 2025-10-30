@@ -83,6 +83,14 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
         name: 'RESOURCE_GROUP'
         value: resourceGroup().name
       }
+      {
+        name: 'PROMETHEUS_YAML'
+        value: loadTextContent('prometheus.yaml')
+      }
+      {
+        name: 'GRAFANA_YAML'
+        value: loadTextContent('grafana.yaml')
+      }
     ]
     scriptContent: loadTextContent('deploy-k8s-stack.sh')
   }
@@ -170,7 +178,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2023-09-01' = {
 resource vm 'Microsoft.Compute/virtualMachines@2023-09-01' = {
   name: vmName
   location: location
-  dependsOn: [roleAssignment]
+  dependsOn: [aksCluster, roleAssignment]
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {

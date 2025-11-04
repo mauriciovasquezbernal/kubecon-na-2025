@@ -1,107 +1,162 @@
-# AKS Infrastructure for KubeCon NA 2025
+# Contribfest: Inspektor Gadget Contribfest: Enhancing the Observability and Security of Your K8s Clusters Through an easy to use Framework
 
-This Bicep template creates a production-ready Azure Kubernetes Service (AKS) cluster with the following features:
-
-## Features
-
-- **AKS Cluster** with latest Kubernetes version (1.30.5)
-- **System Node Pool** with auto-scaling (1-5 nodes)
-- **User Node Pool** for application workloads (1-10 nodes)
-- **Azure CNI** networking with Azure Network Policy
-- **Workload Identity** enabled for secure access to Azure resources
-- **OIDC Issuer** for external identity integration
-- **Key Vault CSI Driver** for secrets management
-- **Azure Policy** add-on for governance
-- **Auto-upgrade** enabled for cluster and node OS
-- **Azure Monitor** metrics collection
+Welcome to our contribfest. Please follow this guide to get access to the dev
+enrivonment and the different exercises we have prepared for you.
 
 ## Prerequisites
 
-1. Azure CLI installed and configured
-2. Bicep CLI installed
+We provide a cloud environment with everything installed. However, if you want a
+better experience, you can install the following tools in your local machine:
+- ssh client (to access the dev VM)
+- [az CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [kubectl
+  gadget](https://inspektor-gadget.io/docs/latest/quick-start/#long-running-deployment-on-all-worker-nodes)
 
-## Deployment
+## Dev environment
 
-### 1. Update Parameters (Optional)
+In order to facilitate the exercises, we provide a cloud environment composed
+by:
+- A Kubernetes cluster deployed in Azure Kubernetes Service (AKS) with
+  Prometheus and Grafana installed
+- A development VM with all the needed tools installed to interact with the
+  cluster and to create new gadgets
 
-You can customize the deployment by editing `infra.bicepparam`:
-- Change cluster name, location, or VM sizes
-- Modify node counts or Kubernetes version
-- Update tags as needed
+### Activating the Dev Environment
 
-### 2. Create Resource Group
+Follow
+[this](https://experience.cloudlabs.ai/#/odl/b5f301cd-bacb-45d0-b642-2be884f221b6)
+link to activate your dev environment, the activation code is `TODO`. Fill your
+data and click on "Submit"
 
-```bash
-az group create --name rg-kubeconna2025 --location southcentralus
-```
+![alt text](./images/registration1.png)
 
-### 4. Deploy Infrastructure
+On the next screen, click on "Launch Lab", then wait until it's ready.
 
-```bash
-az deployment group create \
-  --resource-group rg-kubeconna2025 \
-  --template-file infra.bicep \
-  --parameters infra.bicepparam
-```
+![alt text](./images/labloading.png)
 
-### 5. Get Cluster Credentials
+One the lab is ready, it'll log you in a Windows VM, we don't use it, instead,
+check on the side panel looking for the Azure portal credentials:
 
-```bash
-az aks get-credentials \
-  --resource-group rg-kubeconna2025 \
-  --name aks-kubeconna2025
-```
+![alt text](./images/azurecreds.png)
 
-### 6. Verify Deployment
+These are the credentials you'll use to log into the Azure portal and when using
+`az login`.
 
-```bash
-kubectl get nodes
-kubectl get pods --all-namespaces
-```
+### Accessing the dev VM
 
-## Configuration Details
+Login into the [azure portal](https://portal.azure.com/) then click into
+"Virtual Machines"
 
-### Node Pools
+![alt text](./images/vms.png)
 
-- **System Pool**: Dedicated for system components (kube-system pods)
-  - VM Size: Standard_D2s_v3
-  - Auto-scaling: 1-5 nodes
-  - Taints: `CriticalAddonsOnly=true:NoSchedule`
+and then click on the `demo-vm`. Write down the IP address from the overview
+tab:
 
-- **User Pool**: For application workloads
-  - VM Size: Standard_D4s_v3
-  - Auto-scaling: 1-10 nodes
+![alt text](./images/vmoverview.png)
 
-### Networking
+and the password from the tags tab:
 
-- **Service CIDR**: 10.96.0.0/16
-- **DNS Service IP**: 10.96.0.10
-- **Network Plugin**: Azure CNI
-- **Network Policy**: Azure
+![alt text](./images/vmpassword.png)
 
-### Security
-
-- **RBAC**: Enabled
-- **Workload Identity**: Enabled
-- **Private Cluster**: Disabled (for demo purposes)
-- **Auto-upgrade**: Stable channel
-
-## Clean Up
+and use them to ssh into the machine:
 
 ```bash
-az group delete --name rg-kubeconna2025 --yes --no-wait
+$ ssh azureuser@<IP_ADDRESS>
+azureuser@demo-vm:~$
 ```
 
-## Customization
+### Accessing the Kubernetes Cluster
 
-To customize the deployment:
+#### From the dev VM
 
-1. Modify parameters in `infra.bicepparam`
-2. Adjust resource configurations in `infra.bicep`
-3. Add additional node pools or features as needed
+The dev VM has kubectl already configured to access the demo cluster, so you can
+use it directly.
 
-For production use, consider:
-- Enabling private cluster
-- Adding Azure Application Gateway ingress
-- Configuring Azure Monitor Container Insights
-- Setting up GitOps with Azure Arc or Flux
+```bash
+$ kubectl get nodes
+NAME                                STATUS   ROLES    AGE   VERSION
+aks-nodepool1-30504426-vmss000000   Ready    <none>   24m   v1.32.7
+aks-nodepool1-30504426-vmss000001   Ready    <none>   24m   v1.32.7
+```
+
+#### From your local machine
+
+You need to install the [Azure
+CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) and login using
+the credentials provided before:
+
+```bash
+az login
+```
+
+Then, get the credentials for the cluster:
+
+```bash
+az aks get-credentials --resource-group AKSRG --name aks-kubeconna2025
+```
+
+```bash
+$ kubectl get nodes
+NAME                                STATUS   ROLES    AGE   VERSION
+aks-nodepool1-30504426-vmss000000   Ready    <none>   27m   v1.32.7
+aks-nodepool1-30504426-vmss000001   Ready    <none>   27m   v1.32.7
+```
+
+## Deploying Inspektor Gadget
+
+Now that you have access to the cluster, it's time to deploy Inspektor Gadget.
+
+> [!WARNING]
+> If you're using your local machine, make sure you have
+> [kubectl-gadget](https://inspektor-gadget.io/docs/latest/quick-start/#long-running-deployment-on-all-worker-nodes)
+> installed.
+
+To deploy Inspektor Gadget, run the following command:
+
+```bash
+kubectl gadget deploy
+```
+
+### Running your first Gadget
+
+Now that you have Inspektor Gadget deployed, let's run your first gadget. Let's monitor processes executions by using the trace_exec gadget:
+
+```bash
+kubectl gadget run trace exec
+```
+
+In another terminal, create a pod that will generate some process executions:
+
+```bash
+$ kubectl run --restart=Never --image=busybox myapp1-pod --labels="name=myapp1-pod,myapp=app-one,role=demo" -- sh -c 'while /bin/true ; do date ; cat /proc/version ; /bin/sleep 1 ; done'
+pod/myapp1-pod created
+```
+
+You should see the process executions in the first terminal:
+
+```bash
+K8S.NODE            K8S.NAMESPACE               K8S.PODNAME                 K8S.CONTAINERNAME           COMM                        PID            TID PCOMM                    PPID ARGS           ERR… USER           LOGINUSER      GROUP
+aks-nodepool1-3050  default                     myapp1-pod                  myapp1-pod                  true                    2957112        2957112 sh                    2589510 /bin/true           root           uid:4294967295 root
+aks-nodepool1-3050  default                     myapp1-pod                  myapp1-pod                  date                    2957113        2957113 sh                    2589510 /bin/date           root           uid:4294967295 root
+```
+
+Now that you have run your first gadget, it's time to explore more advanced use cases.
+
+## Exercises
+
+### Exercise 1: Troubleshoot your cluster with Gadgets
+
+TODO: Jose
+
+### Exercise 2: Export metrics to Prometheus / Grafana
+
+TODO: Jose
+
+### Exercise 3: Create your own Gadget
+
+TODO: Jose
+
+### Exercise 4: Contribute to Inspektor Gadget
+
+TODO: Mauricio

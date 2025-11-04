@@ -1,0 +1,13 @@
+# this exposes grafana via a LoadBalancer service in AKS
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-ext-service
+  namespace: monitoring
+spec:
+  type: LoadBalancer
+  selector:
+    app: grafana
+  ports:
+    - port: 3000
+      targetPort: 3000

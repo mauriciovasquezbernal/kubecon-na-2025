@@ -2,7 +2,7 @@
 
 set -eoux pipefail
 
-export IG_VERSION=v0.45.0
+export IG_VERSION=v0.46.0
 export IG_ARCH=amd64
 
 sudo apt-get update

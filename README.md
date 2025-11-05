@@ -9,7 +9,7 @@ We provide a cloud environment with everything installed. However, if you want a
 better experience, you can install the following tools in your local machine:
 - ssh client (to access the dev VM)
 - [az CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 - [kubectl
   gadget](https://inspektor-gadget.io/docs/latest/quick-start/#long-running-deployment-on-all-worker-nodes)
 

@@ -757,4 +757,19 @@ In my example we can see that the `sh` process in the container named
 `vibrant_darwin`, which is a `busybox` image opened a file named `bar` with the
 flags `O_WRONLY|O_CREAT|O_TRUNC`
 
+## Running our gadget in Kubernetes
+
+Now that we have built and pushed our gadget to an OCI registry, we can run it
+in a Kubernetes cluster by using:
+
+```bash
+# undeploy existing installation
+$ kubectl gadget undeploy
+
+# deploy inspektor gadget with gadget verification disabled
+$ kubectl gadget deploy  --verify-image=false
+
+$ kubectl gadget run ttl.sh/<the_same_id_here>
+```
+
 ## Thanks for building your own gadgets with Inspektor Gadget

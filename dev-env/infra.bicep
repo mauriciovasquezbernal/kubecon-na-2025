@@ -90,6 +90,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
         name: 'GRAFANA_YAML'
         value: loadTextContent('grafana.yaml')
       }
+      {
+        name: 'GRAFANA_SERVICE_YAML'
+        value: loadTextContent('grafana-service.yaml')
+      }
     ]
     scriptContent: loadTextContent('deploy-k8s-stack.sh')
   }

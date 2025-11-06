@@ -18,6 +18,7 @@ az aks get-credentials --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --o
 echo "Creating Kubernetes manifests..."
 echo "$PROMETHEUS_YAML" > prometheus.yaml
 echo "$GRAFANA_YAML" > grafana.yaml
+echo "$GRAFANA_SERVICE_YAML" > grafana-service.yaml
 
 # Deploy prometheus
 echo "Deploying Prometheus..."

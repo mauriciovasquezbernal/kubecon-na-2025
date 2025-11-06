@@ -5,8 +5,8 @@ environment and the different exercises we have prepared for you.
 
 ## Prerequisites
 
-We provide a cloud environment with everything installed. However, if you want a
-better experience, you can install the following tools in your local machine:
+We provide a cloud environment with everything installed. However, you can run
+it on your local machine by installing the following tools:
 - ssh client (to access the dev VM)
 - [az CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
@@ -24,10 +24,9 @@ by:
 
 ### Activating the Dev Environment
 
-Follow
-[this](https://experience.cloudlabs.ai/#/odl/b5f301cd-bacb-45d0-b642-2be884f221b6)
-link to activate your dev environment, the activation code is `TODO`. Fill your
-data and click on "Submit"
+Go to https://experience.cloudlabs.ai/#/odl/b5f301cd-bacb-45d0-b642-2be884f221b6
+to activate your dev environment, use the activation code provided during the
+presentation, fill your information data and click on "Submit"
 
 ![alt text](./images/registration1.png)
 

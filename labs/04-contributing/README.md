@@ -11,7 +11,8 @@ take a couple of hours to be done.
 Please check out contributing guidelines in the main repository:
 https://inspektor-gadget.io/docs/main/devel/contributing to understand how to
 setup the dev environment, fork the repository, create branches, make pull
-requests, etc.
+requests, etc. You can install the tools required on your local machine or use
+the dev VM provided.
 
 ## Picking up an issue
 

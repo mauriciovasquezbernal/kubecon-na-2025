@@ -148,3 +148,10 @@ Now that you have run your first gadget, it's time to explore more advanced use 
 - [Export metrics to Prometheus / Grafana](./labs/02-monitoring/README.md)
 - [Create your own Gadget](./labs/03-creating-your-own-gadget/README.md)
 - [Contribute to Inspektor Gadget](./labs/04-contributing/README.md)
+
+## Thanks
+
+Thanks for the whole Inspektor Gadget team for the work on the project, and
+specially to @burak-ok, @mqasimsarfraz and @flyth who prepared a contribfest
+early this year that served as base for this one:
+https://github.com/inspektor-gadget/Contribfest-KubeCon-Europe2025

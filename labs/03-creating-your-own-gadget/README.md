@@ -3,7 +3,7 @@
 In this track we will introduce how you can build your own gadget. Gadgets are a
 fundamental component of Inspektor Gadget and act as the mechanism for data
 collection. They are bundled in an OCI image an consist of 3 parts:
-1. The eBPF program which gathers the low level date
+1. The eBPF program which gathers the low level data
 2. The YAML file which includes the metadata about the gadget, so the consumer
    knows about its functionality
 3. An optional WASM layer for userspace processing and enrichment
@@ -21,6 +21,10 @@ This lab requires some knowledge of the C programming language and golang for
 the optional WASM part. It is split into 4 tasks, you can find the proposed
 solutions for them in the solutions folder.
 
+You can check at any time our Gadget Development documentation
+https://inspektor-gadget.io/docs/latest/gadget-devel/ if you need more
+information.
+
 Let's start our journey and create a folder dedicated to our gadget:
 ```bash
 ~ $ mkdir mygadget
@@ -33,7 +37,7 @@ Let's start our journey and create a folder dedicated to our gadget:
 Since we want to observe everything regarding opening a file, we first need to
 create an `eBPF` program. These are small little programs run inside the kernel,
 without modifying it. We are writing them in C (with restrictions). You can
-start by copying this template:
+start by copying this template into a file named `program.bpf.c`:
 
 ```c
 // Kernel types definitions
@@ -115,7 +119,7 @@ compilation is only a single line in the terminal: `sudo ig image build
 path/to/gadget/dir -t tag.io/for/the/docker/image`. In our case we need to do
 
 ```bash
-~/mygadget $ sudo ig image build -t open .
+~/mygadget $ sudo ig image build . -t open
 Pulling builder image ghcr.io/inspektor-gadget/ebpf-builder@sha256:abde516ef837b9df6f8b70c9cd834cd4f0396d5b07e6a034906846c4935c7f24
 ghcr.io/inspektor-gadget/ebpf-builder@sha256:abde516ef837b9df6f8b70c9cd834cd4f0396d5b07e6a034906846c4935c7f24: Pulling from inspektor-gadget/ebpf-builder
 Digest: sha256:abde516ef837b9df6f8b70c9cd834cd4f0396d5b07e6a034906846c4935c7f24
@@ -162,9 +166,9 @@ WARN[0000] Builder version not found in the gadget image. Gadget could be incomp
 WARN[0000] image signature verification is disabled due to using corresponding option
 WARN[0000] Builder version not found in the gadget image. Gadget could be incompatible
 TIMESTAMP
-2025-03-26T16:30:59.031662244+01:00
-2025-03-26T16:30:59.032459287+01:00
-2025-03-26T16:30:59.032466315+01:00
+2025-11-07T10:08:33.274850733-05:00
+2025-11-07T10:08:33.274859710-05:00
+2025-11-07T10:08:33.274863047-05:00
 ...
 ```
 
@@ -197,7 +201,7 @@ insides of that struct.
 
 In the method body you see that we are just calling another function
 `enter_openat`. That function actually contains all the logic we want to write.
-We split that into its own separate function since there are actually **2**
+We split that into its own separate function since there are actually **two**
 different syscalls to open a file. One is `openat` and the second one `open`. We
 don't know which of these syscalls the programs are calling so we should trace
 both.
@@ -229,7 +233,7 @@ let's look what the current code does:
 ```
 If you remember we needed to create a container to generate some events in our
 gadget. But an eBPF program attached to a syscall can see every syscall
-invocation on the host. Most of the time you don't want that, especially in the
+invocation on the host. Most of the times you don't want that, especially in the
 Kubernetes scenario. The function `gadget_should_discard_data_current` helps us
 to achieve that and provides premade filtering logic. For example, we can
 already run our gadget and trace only events for a container named `nginx-40` by
@@ -290,10 +294,11 @@ struct event {
 After implementing this correctly, building and running the gadget, running some
 commands in our test container should result in the following:
 ```bash
-~/mygadget $ sudo ./ig run open --verify-image=false
-RUNTIME.CONTAINERNAME													   COMM					PID		TID
-vibrant_darwin															  sh				  3524211	3524211
-vibrant_darwin															  sh				  3524211	3524211
+~/mygadget $ sudo ig run open --verify-image=false
+RUNTIME.CONTAINERNAME                                                                COMM                    PID        TID
+intelligent_hertz                                                                    sh                    26077      26077
+intelligent_hertz                                                                    sh                    26077      2607
+...
 ```
 
 And it shows us the container name, the command which executed the syscall and
@@ -304,15 +309,13 @@ more. Congratulations!
 Now that we have some basic information about the events, we can expand our
 gadget more. Until now we didn't do anything with the `struct
 syscall_trace_enter *ctx` parameter besides passing them to some Inspektor
-Gadget function.
+Gadget functions.
 
 Looking at the linux kernel source code at
 [elixir.bootlin.com](https://elixir.bootlin.com/linux/v6.13.7/source/kernel/trace/trace.h#L137)
 we see that this struct also contains the arguments `args` of the system call in
-an array.
-
-Therefore, we should look up at which position the filename parameter. Looking
-at the linux source code we see that the function definitions for
+an array. Therefore, we should look up at which position the filename parameter.
+Looking at the linux source code we see that the function definitions for
 [`open`](https://elixir.bootlin.com/linux/v6.13.7/source/fs/open.c#L1421) and
 [`openat`](https://elixir.bootlin.com/linux/v6.13.7/source/fs/open.c#L1428).
 
@@ -372,9 +375,10 @@ int open_entry(struct syscall_trace_enter *ctx)
 Running some commands in our test container gives the following:
 
 ```bash
-~/mygadget $ sudo ./ig run open --verify-image=false
-RUNTIME.CONTAINERNAME							 COMM					PID		TID FILENAME
-vibrant_darwin									sh				  3524211	3524211
+~/mygadget $ sudo ig run open --verify-image=false
+RUNTIME.CONTAINERNAME                                   COMM                    PID        TID FILENAME
+intelligent_hertz                                       sh                    26077      26077
+intelligent_hertz                                       sh                    26077      26077
 ```
 
 ### Copying user space bytes
@@ -418,9 +422,9 @@ Now when running a simple `echo foo > bar` command in our test container we can
 see the following output when we have our gadget running:
 
 ```bash
-~/mygadget $ sudo ./ig run open --verify-image=false
-RUNTIME.CONTAINERNAME							 COMM					PID		TID FILENAME
-vibrant_darwin									sh				  3524211	3524211 bar
+~/mygadget $ sudo ig run open --verify-image=false
+RUNTIME.CONTAINERNAME                                   COMM                    PID        TID FILENAME
+intelligent_hertz                                       sh                    26077      26077 bar
 ```
 
 Now we are able to see which command in which container access which file on the
@@ -428,7 +432,7 @@ filesystem 🎉
 
 ## 02 Flags while opening a file
 
-There are other parameters in the `open` and `openat` systemcall, which might
+There are other parameters in the `open` and `openat` system call, which might
 interest us:
 
 ```C
@@ -489,9 +493,9 @@ When building and running our gadget, we can again run some commands in our test
 container and see the results:
 
 ```bash
-~/mygadget $ sudo ./ig run open --verify-image=false
-RUNTIME.CONTAINERNAME					 COMM					PID		TID FILENAME			  FLAGS
-vibrant_darwin							sh				  3524211	3524211 bar				   577
+~/mygadget $ sudo ig run open --verify-image=false
+RUNTIME.CONTAINERNAME                           COMM                    PID        TID FILENAME                 FLAGS
+intelligent_hertz                               sh                    26077      26077 bar                      577
 ```
 
 We now can see the flags in our events. To make it more readable we can process
@@ -510,21 +514,26 @@ For lab testing purposes we can use [the `ttl.sh` registry](https://ttl.sh/). It
 allows anonymous image pushing and pulling and saves the oci images for a
 specified time. Please choose a unique tag (best would be to use `uuidgen`).
 
-To tag our image correctly we can specify it while building it
+To tag our image correctly we can specify it while building it.
+
+> [!WARNING]
+> Please notice the `-E` flag in `sudo -E ig ...`. This is required to preserve
+> the ID environment variable.
+
 ```bash
 ~/mygadget $ ID=$(uuidgen)
-~/mygadget $ sudo -E ig image build -t ttl.sh/$ID .
+~/mygadget $ sudo -E ig image build . -t ttl.sh/$ID
 ```
+
 or we can retag our existing built gadget
+
 ```bash
 ~/mygadget $ sudo -E ig image tag open ttl.sh/$ID
 ```
 
 and then we can finally push it to the registry:
-```bash
-~/mygadget $ sudo -E ig image tag open ttl.sh/$ID
-Successfully tagged with ttl.sh/9272b90f-a23e-4457-bc84-e3f6106cba31:latest@sha256:d88da3ac5e383127853c23f0caf93312d8a277bae22bd3122d4dde5212103a75
 
+```bash
 ~/mygadget $ sudo -E ig image push ttl.sh/$ID
 Pushing ttl.sh/9272b90f-a23e-4457-bc84-e3f6106cba31...
 Successfully pushed ttl.sh/9272b90f-a23e-4457-bc84-e3f6106cba31:latest@sha256:d88da3ac5e383127853c23f0caf93312d8a277bae22bd3122d4dde5212103a75
@@ -544,8 +553,8 @@ vibrant_darwin							sh				  3524211	3524211 bar				   577
 If you remember, the output of our gadget looks currently like this:
 ```bash
 ~/mygadget $ sudo ig run open --verify-image=false
-RUNTIME.CONTAINERNAME					 COMM					PID		TID FILENAME			  FLAGS
-vibrant_darwin							sh				  3524211	3524211 bar				   577
+RUNTIME.CONTAINERNAME                           COMM                    PID        TID FILENAME                 FLAGS
+intelligent_hertz                               sh                    26077      26077 bar                      577
 ```
 
 Everything is quite usable besides the `FLAGS` column. It would be optimal if we
@@ -663,9 +672,16 @@ and the `go.mod` file with the following content:
 ```
 module main
 
-go 1.23.0
+go 1.24.0
 
 require github.com/inspektor-gadget/inspektor-gadget v0.46.0
+```
+
+and then, pull the go dependencies with:
+
+```bash
+~/mygadget $ cd go
+~/mygadget/go $ go mod tidy
 ```
 
 Inspektor Gadget will look at `go/main.go`, try to compile that package into
@@ -684,7 +700,10 @@ of `flagsField`, decoding it with `decodeFlags` and finally set the string into
 `flagsDecodedField`.
 
 Your task is to implement the body of that function. It is marked in the
-template and you only need to extend that area.
+template and you only need to extend that area. Please check the [Go
+documentation
+](https://pkg.go.dev/github.com/inspektor-gadget/inspektor-gadget/wasmapi/go)for
+our Wasm API.
 
 <details>
 <summary>Solution</summary>
@@ -706,7 +725,7 @@ template and you only need to extend that area.
 After rebuilding our gadget we can see the new field with its content:
 
 ```bash
-~/mygadget $ sudo ./ig run open --verify-image=false
+~/mygadget $ sudo ig run open --verify-image=false
 RUNTIME.CONTAINERNAME		  COMM		PID		TID	 FILENAME		FLAGS	FLAGS_DECODED
 vibrant_darwin				 sh		  3524211	3524211 bar			 577	  O_WRONLY|O_CREAT|O_TRU…
 ```
@@ -717,49 +736,59 @@ you all the fields currently available. Many of them we didn't see in this lab
 and ignored it:
 
 ```json
-~/mygadget $ sudo ./ig run open --verify-image=false -o jsonpretty
+~/mygadget $ sudo ig run open --verify-image=false -o jsonpretty
 {
   "filename": "bar",
   "flags": 577,
-  "flags_decoded": "O_WRONLY|O_CREAT|O_TRUNC",
-...
+  "k8s": {
+    "containerName": "",
+    "hostnetwork": false,
+    "namespace": "",
+    "node": "",
+    "owner": {
+      "kind": "",
+      "name": ""
+    },
+    "podLabels": "",
+    "podName": ""
+  },
   "proc": {
-	"comm": "sh",
-	"creds": {
-	  "gid": 0,
-	  "group": "root",
-	  "uid": 0,
-	  "user": "root"
-	},
-	"mntns_id": 4026532426,
-	"parent": {
-	  "comm": "containerd-shim",
-	  "pid": 3524190
-	},
-	"pid": 3524211,
-	"tid": 3524211
+    "comm": "sh",
+    "creds": {
+      "gid": 0,
+      "group": "root",
+      "uid": 0,
+      "user": "root"
+    },
+    "mntns_id": 4026533994,
+    "parent": {
+      "comm": "containerd-shim",
+      "pid": 26057
+    },
+    "pid": 26077,
+    "tid": 26077
   },
   "runtime": {
-	"containerId": "16a5318354133f73ba4e5bfa0a19a2eaa8fb1234ef15f1867d8fd789baad6f71",
-	"containerImageDigest": "sha256:9ae97d36d26566ff84e8893c64a6dc4fe8ca6d1144bf5b87b2b85a32def253c7",
-	"containerImageName": "busybox",
-	"containerName": "vibrant_darwin",
-	"containerPid": 3524211,
-	"containerStartedAt": 1743003058982344231,
-	"runtimeName": "docker"
+    "containerId": "c60c9f78db1d7eb60a85717aaa728b06914c316148fc52d3c99c95fda6bbe61e",
+    "containerImageDigest": "sha256:37f7b378a29ceb4c551b1b5582e27747b855bbfaa73fa11914fe0df028dc581f",
+    "containerImageName": "busybox",
+    "containerName": "intelligent_hertz",
+    "containerPid": 26077,
+    "containerStartedAt": 1762528113202982961,
+    "runtimeName": "docker"
   },
-  "timestamp": "2025-03-27T18:26:41.286624603+01:00",
-  "timestamp_raw": 1743096401286624603
+  "timestamp": "2025-11-07T10:36:42.831164318-05:00",
+  "timestamp_raw": 1762529802831164318
 }
 ```
 
 In my example we can see that the `sh` process in the container named
-`vibrant_darwin`, which is a `busybox` image opened a file named `bar` with the
+`intelligent_hertz`, which is a `busybox` image opened a file named `bar` with the
 flags `O_WRONLY|O_CREAT|O_TRUNC`
 
-## Running our gadget in Kubernetes
+## Running our Gadget in Kubernetes
 
-Now that we have built and pushed our gadget to an OCI registry, we can run it
+Now that we have built and pushed our Gadget to an OCI registry, we can run it
 in a Kubernetes cluster by using:
 
 ```bash

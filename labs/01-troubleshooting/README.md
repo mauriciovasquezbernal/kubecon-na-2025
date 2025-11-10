@@ -230,7 +230,7 @@ kubectl gadget run trace_fsslower:v0.46.0 -n training --min 0 --fields k8s.podNa
 
 </details>
 
-The second challenge is to filter only the operations on checkpoint files:
+The second challenge is to filter only the operations on checkpoint files. (Nit: these files start with `model_epoch_`)
 
 <details>
 <summary>Solution</summary>

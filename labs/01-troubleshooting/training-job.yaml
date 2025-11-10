@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: training
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: training-job
+  namespace: training
+spec:
+  containers:
+  - name: trainer
+    image: ubuntu
+    command:
+    - bash
+    - -c
+    - |
+      echo 'Starting ML training...'
+      epoch=1
+      while true; do
+        echo "Training epoch $epoch..."
+        # Simulate training computation
+        sleep 8
+
+        echo "Saving model checkpoint for epoch $epoch..."
+        # Simulate saving model checkpoint
+        dd if=/dev/urandom of=/tmp/model_epoch_$epoch.pkl bs=1M count=10 conv=fsync
+
+        echo "Checkpoint saved for epoch $epoch"
+        epoch=$((epoch + 1))
+      done
+    resources:
+      limits:
+        cpu: "300m"      # Limited CPU - simulates resource-constrained environment
+        memory: "512Mi"
+      requests:
+        cpu: "200m"
+        memory: "256Mi"

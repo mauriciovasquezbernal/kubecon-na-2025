@@ -122,7 +122,7 @@ kubectl gadget deploy
 Now that you have Inspektor Gadget deployed, let's run your first gadget. Let's monitor processes executions by using the trace_exec gadget:
 
 ```bash
-kubectl gadget run trace exec
+kubectl gadget run trace_exec
 ```
 
 In another terminal, create a pod that will generate some process executions:

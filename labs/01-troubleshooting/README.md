@@ -219,7 +219,7 @@ Several processes are running in the pod, but we are only interested in the `dd`
 The first challenge is to use the `--filter` flag to show only operations performed by the `dd` command.
 
 > [!TIP]
-> You can use `kubectl gadget run trace_fsslower:v0.46.0 --help` to see the how to use the `--filter` option and what `fields` are available to filter on.*
+> You can use `kubectl gadget run trace_fsslower:v0.46.0 --help` to see how to use the `--filter` option and what `fields` are available to filter on.
 
 <details>
 <summary>Solution</summary>

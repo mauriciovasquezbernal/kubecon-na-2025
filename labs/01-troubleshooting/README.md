@@ -97,8 +97,6 @@ This output shows the complete lifecycle of an HTTP request:
 3. **HTTP Communication** (lines 8-11): Pod sends GET request, server responds with HTTP 200 OK
 4. **Connection Teardown** (lines 12-14): Clean connection close with `[F.]` flags
 
-**Troubleshooting insight**: This trace helps identify where failures occur: DNS timeouts, TCP connection refusals, HTTP errors, or TLS certificate issues would each show up at different stages.
-
 Stop the tcpdump gadget by pressing `Ctrl+C`.
 
 ### Challenge

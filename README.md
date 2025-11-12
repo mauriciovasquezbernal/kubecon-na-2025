@@ -58,7 +58,7 @@ aks-nodepool1-25038520-vmss000001   Ready    <none>   92m   v1.32.7
 If you prefer to use your own machine to access the dev VM and/or the Kubernetes
 cluster.
 
-#### Dev VM access
+#### Access the Dev VM from your own machine
 
 You can use SSH. Click on the "Environment" tab and look for the data to access
 the dev VM:
@@ -75,7 +75,7 @@ $ ssh azureuser@lab195___.eastus.cloudapp.azure.com
 azureuser@lab195___:~$
 ```
 
-#### Kubernetes Cluster
+#### Access the Kubernetes Cluster fom your own machine
 
 You need to install the [Azure
 CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) and login using

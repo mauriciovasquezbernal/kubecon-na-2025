@@ -109,7 +109,7 @@ prometheus-service    ClusterIP      10.0.184.183   <none>          9090/TCP    
 
 Now, open your browser and point it to `http://<GRAFANA-EXTERNAL-IP>:3000/` and login with `admin` and `ig-contribfest-grafana-admin-pass`. Goto `Dashboards` and click the ▾ arrow next to the `New` button at the top-right corner of the page and select `Import`:
 
-![alt text](import_dashboard.png)
+![alt text](img/import_dashboard.png)
 
 For the sake of simplicity we've prepared a simple Dashboard showing the latency - you can just copy the JSON below and paste it into the `Import via dashboard JSON model` textarea and then click `Load`:
 
@@ -250,7 +250,7 @@ For the sake of simplicity we've prepared a simple Dashboard showing the latency
 
 Then, select the Prometheus data source and click `Import`:
 
-![alt text](select_datasource.png)
+![alt text](img/select_datasource.png)
 
 If you check the `targets.expr` of the `Histogram Latency` panel in the dashboard JSON, it's running the following Prometheus query:
 
@@ -435,4 +435,4 @@ This query sums up the `latency__s_bucket` metrics, grouping them by both the `l
 
 With this setup, you can now visualize the block I/O latency distribution per node in your Kubernetes cluster using Inspektor Gadget, Prometheus, and Grafana!
 
-![alt text](pernode_latency.png)
+![alt text](img/pernode_latency.png)

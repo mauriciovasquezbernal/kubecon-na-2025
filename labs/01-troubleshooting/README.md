@@ -2,7 +2,7 @@
 
 ## Overview
 
-Inspektor Gadget has a powerful set of [gadgets](https://artifacthub.io/packages/search?kind=22&verified_publisher=true&official=true&cncf=true&sort=relevance&page=1) that can be used to troubleshoot and debug issues in your Kubernetes cluster. This lab will focus on highlighting some of the key gadgets
+Inspektor Gadget has a powerful set of [gadgets](https://inspektor-gadget.io/docs/latest/gadgets/) that can be used to troubleshoot and debug issues in your Kubernetes cluster. This lab will focus on highlighting some of the key gadgets
 and different ways to use them to troubleshoot issues in your cluster.
 
 ### Task 1: Capturing Network Traffic with tcpdump
@@ -120,13 +120,14 @@ A more efficient approach is to use Inspektor Gadget's `--pf` flag as is applied
 kubectl gadget run tcpdump:v0.46.0 -n network-debug --pf "port 80" -o pcap-ng | tcpdump -nvr -
 ```
 
-> [!IMPORTANT]
-> The best part is that the `pf` filter supports standard tcpdump filter expressions, for example:
->
-> - Capture only DNS traffic: `--pf "port 53"`
-> - Capture traffic to a specific host: `--pf "host 93.184.215.14"`
-> - Capture only TCP traffic: `--pf "tcp"`
-> - Combine filters: `--pf "tcp and port 443"`
+**Additional useful filters:**
+
+The `--pf` flag supports standard tcpdump filter expressions:
+
+- Capture only DNS traffic: `--pf "port 53"`
+- Capture traffic to a specific host: `--pf "host 93.184.215.14"`
+- Capture only TCP traffic: `--pf "tcp"`
+- Combine filters: `--pf "tcp and port 443"`
 
 </details>
 

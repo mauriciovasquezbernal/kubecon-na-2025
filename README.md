@@ -114,7 +114,8 @@ Now that you have access to the cluster, it's time to deploy Inspektor Gadget.
 To deploy Inspektor Gadget, run the following command:
 
 ```bash
-kubectl gadget deploy
+wget https://raw.githubusercontent.com/inspektor-gadget/Contribfest-KubeCon-NA2025/refs/heads/main/labs/daemon-config.yaml
+kubectl gadget deploy --daemon-config daemon-config.yaml
 ```
 
 ### Running your first Gadget

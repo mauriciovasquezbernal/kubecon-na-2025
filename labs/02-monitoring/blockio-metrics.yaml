@@ -1,0 +1,7 @@
+apiVersion: 1
+kind: instance-spec
+image: profile_blockio:latest
+name: profileblockio-with-nodeinfo
+paramValues:
+  operator.otel-metrics.otel-metrics-name: blockio:blockio-metrics-with-nodeinfo
+  operator.oci.annotate: blockio:metrics.collect=true,blockio:env.fields.node=NODE_NAME,blockio.node:metrics.type=key

@@ -45,15 +45,6 @@ aks-nodepool1-25038520-vmss000001   Ready    <none>   92m   v1.32.7
 
 ### Using your own machine
 
-If you prefer to use your own machine to access the dev VM and/or the Kubernetes
-cluster you'll need the following tools:
-
-- ssh client (to access the dev VM)
-- [az CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
-- [kubectl
-  gadget](https://inspektor-gadget.io/docs/latest/quick-start/#long-running-deployment-on-all-worker-nodes)
-
 #### Access the Dev VM from your own machine
 
 You can use SSH. Click on the "Environment" tab and look for the data to access
@@ -71,11 +62,17 @@ $ ssh azureuser@lab195___.eastus.cloudapp.azure.com
 azureuser@lab195___:~$
 ```
 
-#### Access the Kubernetes Cluster fom your own machine
+#### Access the Kubernetes Cluster from your own machine
 
-You need to install the [Azure
-CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) and login using
-the Azure credentials on the Environment tab:
+If you prefer to use your own machine to access the Kubernetes cluster you'll
+need the following tools:
+
+- [az CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [kubectl
+  gadget](https://inspektor-gadget.io/docs/latest/quick-start/#long-running-deployment-on-all-worker-nodes)
+
+You need to use az using the using the Azure credentials on the Environment tab:
 
 <p align="center">
   <img src="./images/azurecreds.png" alt="Azure credentials in Environment tab">

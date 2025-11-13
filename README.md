@@ -3,6 +3,8 @@
 Welcome to our contribfest. Please follow this guide to get access to the dev
 environment and the different exercises we have prepared for you.
 
+Check the slides [here](./presentation.pdf)
+
 ## Dev environment
 
 In order to facilitate the exercises, we provide a cloud environment composed

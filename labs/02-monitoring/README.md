@@ -215,7 +215,7 @@ For the sake of simplicity we've prepared a simple Dashboard showing the latency
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum by(le) (latency__s_bucket{otel_scope_name=\"blockio-metrics-with-nodeinfo\"})",
+          "expr": "sum by(le) (latency__s_bucket{otel_scope_name=\"blockio-metrics\"})",
           "format": "heatmap",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
